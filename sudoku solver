@@ -1,0 +1,87 @@
+#include <iostream>
+#include <vector>
+#include <map>
+#include <cstring>
+using namespace std;
+
+void helper(int row, int col, vector<vector<char>> &board, map<pair<int, int>, map<int, int>> &mp, vector<map<int, int>> &rows, vector<map<int, int>> &cols){     //using pass by reference to save storage space
+  
+    //base case
+    if(row == 9){
+        for(auto it : board){
+            for(auto i : it){
+                cout << i << " ";
+            }
+            cout << "\n" ;
+        }
+        cout << "\n" ;
+        return ;
+    }
+
+    if(col == 9){   //means we have filled the whole column and we want to go to the next row
+        helper(row+1, 0, board, mp, rows, cols);
+        return ;
+    }
+
+    if(board[row][col] != '.'){
+        //not empty case
+
+        helper(row, col+1, board, mp, rows, cols);
+        return ;
+    }
+
+    for(int i=1; i<=9; i++){        
+        int block_row = row/3, block_col = col/3;       
+        if(! mp[ {block_row, block_col} ][i] && !rows[row][i] && !cols[col][i]){    
+            
+            mp[{block_row, block_col}][i] = 1;     
+            rows[row][i] = 1;                      
+            cols[col][i] = 1;                      
+            board[row][col] = i + '0';             
+
+            helper(row, col+1, board, mp, rows, cols);     
+
+           
+            //undo all the changes for backtracking
+            mp[{block_row, block_col}][i] = 0;
+            rows[row][i] = 0;
+            cols[col][i] = 0;
+            board[row][col] = '.';      
+        }
+    }
+}
+
+void solveSudoku(vector<vector<char>> &board){
+  
+    map<pair<int, int>, map<int, int>> mp;     
+    vector<map<int, int>> rows(9);      //particular row
+    vector<map<int, int>> cols(9);      //particular column
+
+    //populating our map according to the input
+    for(int i=0; i<9; i++){
+        for(int j=0; j<9; j++){
+            if(board[i][j] != '.'){
+                mp[{i/3, j/3}][board[i][j]  - '0'] = 1;    
+                rows[i][board[i][j] - '0'] = 1;    
+                cols[j][board[i][j] - '0'] = 1;    
+            }
+        }
+    }
+
+    helper(0, 0, board, mp, rows, cols);       
+}
+
+int main(){
+       vector<vector<char>> board = {
+            {'5','3','.','.','7','.','.','.','.'},
+            {'6','.','.','1','9','5','.','.','.'},
+            {'.','9','8','.','.','.','.','6','.'},
+            {'8','.','.','.','6','.','.','.','3'},
+            {'4','.','.','8','.','3','.','.','1'},
+            {'7','.','.','.','2','.','.','.','6'},
+            {'.','6','.','.','.','.','2','8','.'},
+            {'.','.','.','4','1','9','.','.','5'},
+            {'.','.','.','.','8','.','.','7','9'}  
+            };
+    solveSudoku(board);
+}
